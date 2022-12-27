@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const { get404 } = require("./controllers/error");
+const db = require("./util/database");
 
 // ExpressHandlebars - Dynamic template
 // app.engine("hbs", engine({ extname: "hbs", defaultLayout: "main-layout",layoutsDir:"views/layouts/" }));
