@@ -10,6 +10,8 @@ const {
   getProduct,
   postCart,
   postCartDeleteProduct,
+  postOrder,
+  getOrders,
 } = shopController;
 
 router.get("/", getIndex);
@@ -19,5 +21,7 @@ router.get("/checkout", getCheckout);
 router.get("/products", getProducts);
 router.get("/products/:productId", getProduct);
 router.post("/cart-delete-item", postCartDeleteProduct);
+router.post("/create-order", postOrder);
+router.get("/orders", getOrders);
 
 module.exports = router;
