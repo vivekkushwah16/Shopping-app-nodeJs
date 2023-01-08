@@ -1,44 +1,72 @@
-// const mongodb = require("mongodb");
-// const getDb = require("../../util/database").getDB;
+const mongoose = require("mongoose");
 
-// const ObjectId = mongodb.ObjectId;
+const Schema = mongoose.Schema;
 
-// class User {
-//   constructor(username, email, cart, id) {
-//     this.name = username;
-//     this.email = email;
-//     this.cart = cart;
-//     this._id = new ObjectId(id);
-//   }
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  cart: {
+    items: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+      },
+    ],
+  },
+});
+
+userSchema.methods.addToCart = function (product) {
+  const cartProductIndex = this.cart.items.findIndex(
+    (cp) => cp.productId.toString() === product._id.toString()
+  );
+  let newQuantity = 1;
+  const updateCartItems = [...this.cart.items];
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updateCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    updateCartItems.push({
+      productId: product._id,
+      quantity: 1,
+    });
+  }
+  this.cart = {
+    items: updateCartItems,
+  };
+
+  return this.save();
+};
+
+userSchema.methods.removeFromCart = function (prodId) {
+  const updatedCartItems = this.cart.items.filter(
+    (cp) => cp.productId.toString() !== prodId.toString()
+  );
+  this.cart = updatedCartItems;
+  return this.save();
+};
+userSchema.methods.clearCart = function () {
+  this.cart = { items: [] };
+  return this.save();
+};
+
+module.exports = mongoose.model("User", userSchema);
 
 //   save() {
 //     const db = getDb();
 //     return db.collection("users").insertOne(this);
 //   }
 
-//   addToCart(product) {
-//     const cartProductIndex = this.cart.items.findIndex(
-//       (cp) => cp.productId.toString() === product._id.toString()
-//     );
-//     let newQuantity = 1;
-//     const updateCartItems = [...this.cart.items];
-//     if (cartProductIndex >= 0) {
-//       newQuantity = this.cart.items[cartProductIndex].quantity + 1;
-//       updateCartItems[cartProductIndex].quantity = newQuantity;
-//     } else {
-//       updateCartItems.push({
-//         productId: new ObjectId(product._id),
-//         quantity: 1,
-//       });
-//     }
-//     const updateCart = {
-//       items: updateCartItems,
-//     };
-//     const db = getDb();
-//     return db
-//       .collection("users")
-//       .updateOne({ _id: this._id }, { $set: { cart: updateCart } });
-//   }
+//
 
 //   getCart() {
 //     const productIds = this.cart.items.map((item) => item.productId);
