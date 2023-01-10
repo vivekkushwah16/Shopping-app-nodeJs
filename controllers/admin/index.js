@@ -1,9 +1,12 @@
 const Product = require("../../models/product");
 
 exports.getAddProducts = (req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    return res.redirect("/login");
+  }
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
-    isAuthentication: req.isLoggedIn,
+    // isAuthenticated: req.session.isLoggedIn,
     path: "/admin/add-product",
     editing: false,
   });
@@ -15,7 +18,7 @@ exports.postAddProducts = (req, res, next) => {
     price,
     description,
     imageUrl,
-    userId: req.session.user._id,
+    userId: req.user,
   });
   product
     .save()
@@ -33,9 +36,8 @@ exports.getProducts = (req, res, next) => {
       res.render("admin/products", {
         prods: products,
         pageTitle: "All Products",
-        isAuthentication: req.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
         path: "/admin/products",
-        isAuthentication: req.isLoggedIn,
       })
     )
     .catch((err) => {
@@ -44,6 +46,9 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getEditProduct = (req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    return res.redirect("/login");
+  }
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
@@ -57,7 +62,7 @@ exports.getEditProduct = (req, res, next) => {
 
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
-        isAuthentication: req.isLoggedIn,
+        // isAuthenticated: req.isLoggedIn,
         path: "/admin/edit-product",
         editing: !!editMode,
         product,
@@ -87,10 +92,13 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
+
   Product.findByIdAndRemove(prodId)
     .then(() => {
-      console.log("PRODUCT DELETED>>>>");
-      res.redirect("/admin/products");
+      console.log("PRODUCT DELETED>>>>", prodId);
+      req.user.removeFromCart(prodId).then(() => {
+        res.redirect("/admin/products");
+      });
     })
     .catch((err) => {
       console.log(">>>>>", err);
