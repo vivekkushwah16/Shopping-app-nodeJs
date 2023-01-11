@@ -70,7 +70,7 @@ app.use(get404);
 mongoose
   .connect(MONGODB_URL)
   .then((result) => {
-    console.log(result, ">>>>>>>>>");
+    // console.log(result, ">>>>>>>>>");
 
     app.listen(3000, () => {
       console.log("listening on port 3000");
