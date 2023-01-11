@@ -1,5 +1,7 @@
 const Product = require("../../models/product");
 const { validationResult } = require("express-validator");
+const { throwError } = require("../../util/path");
+
 exports.getAddProducts = (req, res, next) => {
   if (!req.session.isLoggedIn) {
     return res.redirect("/login");
@@ -45,7 +47,7 @@ exports.postAddProducts = (req, res, next) => {
       res.redirect("/");
     })
     .catch((err) => {
-      console.log(">>>>>>>>>", err);
+      return next(throwError(err, 500));
     });
 };
 
@@ -102,7 +104,7 @@ exports.postEditProduct = (req, res, next) => {
       errorMessage: errors.array()[0].msg,
       path: "/admin/edit-product",
       editing: true,
-      product: { _id:productId, title, imageUrl, price, description },
+      product: { _id: productId, title, imageUrl, price, description },
       validationErrors: errors.array(),
     });
   }
@@ -121,7 +123,7 @@ exports.postEditProduct = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(">>>>>", err);
+      return next(throwError(err, 500));
     });
 };
 

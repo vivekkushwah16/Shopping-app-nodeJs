@@ -10,3 +10,5 @@ export const getCoookiesfronServer = (ctx) => {
   });
   return mycookie.toString().split(";")[0];
 };
+
+
